@@ -5,3 +5,5 @@ library(devtools)
 load_all("./mocapProcessor")
 
 mainFunc(cmdArgs)
+
+

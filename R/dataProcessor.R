@@ -29,7 +29,9 @@ main <- function(videoFile){
   clapper <- paste('{"name": "clapper", "column": ',which( colnames(markerData)=="clapperState" )-1,', "min":',min(markerData$clapperState, na.rm=TRUE),', "max":',max(markerData$clapperState, na.rm=TRUE),'}', sep='')  
   tracks <- paste('"tracks" : [',grip,',',clapper,']')
   
-  call <- paste("python ./mocapProcessor/exec/pyelan/elanGen.py \"",videoFile,"\" \"",elanDir,"\" \'[{\"file\" : \"",paste(csvDir, "/", paste(df$subj, df$session, df$trial,sep="-"),".csv", sep=""),"\", ",tracks,"}]\'", sep="")
+  pathToElanGen <- system.file("exec/pyelan/elanGen.py", package = "mocapProcessor", mustWork=TRUE)
+
+  call <- paste("python ",pathToElanGen," \"",videoFile,"\" \"",elanDir,"\" \'[{\"file\" : \"",paste(csvDir, "/", paste(df$subj, df$session, df$trial,sep="-"),".csv", sep=""),"\", ",tracks,"}]\'", sep="")
   
   options(warn = oldWarn)
   system(call)
