@@ -1,0 +1,15 @@
+Title: A processor for mocap data
+Package: mocapProcessor
+Author: Jonathan Keane <jkeane@gmail.com>
+Maintainer: Jonathan Keane <jkeane@gmail.com>
+Description: 
+Imports:
+    plyr,
+    foreach,
+    doMC,
+    ggplot2,
+    data.table,
+    stringr
+License: 
+Type: Package
+Version: 0.0
