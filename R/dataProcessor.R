@@ -27,17 +27,22 @@ main <- function(videoFile){
   # "tracks" : [{"name": "clapper", "column": 36, "min":0, "max":200}]
    grip <- paste('{"name": "grip", "column": ',which( colnames(markerData)=="0-1" )-1,', "min":',min(markerData$`0-1`, na.rm=TRUE),', "max":',max(markerData$`0-1`, na.rm=TRUE),'}', sep='')
   clapper <- paste('{"name": "clapper", "column": ',which( colnames(markerData)=="clapperState" )-1,', "min":',min(markerData$clapperState, na.rm=TRUE),', "max":',max(markerData$clapperState, na.rm=TRUE),'}', sep='')  
-  tracks <- paste('"tracks" : [',grip,',',clapper,']')
+  meanY <- paste('{"name": "meanY", "column": ',which( colnames(markerData)=="mean-Y-0-1-2-3-4" )-1,', "min":',min(markerData$`mean-Y-0-1-2-3-4`, na.rm=TRUE),', "max":',max(markerData$`mean-Y-0-1-2-3-4`, na.rm=TRUE),'}', sep='')
+  tracks <- paste('"tracks" : [',grip,',',clapper,',',meanY,']')
 
   # check the times of the mocap data and the video data
   mocapDur <- max(markerData$times)
   videoDur <- videoLength(shQuote(videoFile))
-  fuzz <- 0.5
-  if(mocapDur > videoDur+fuzz){
-    warning(paste("The motion capture data (",as.character(mocapDur)," seconds) is longer than the video data (",as.character(videoDur)," seconds). This is a sign that there is a problem with alignment.", sep = ""))
-  } 
-  if(mocapDur+fuzz < videoDur){
-    warning(paste("The video data (",as.character(videoDur)," seconds) is longer than the motion capture data (",as.character(mocapDur)," seconds). This is a sign that there is a problem with alignment.", sep = ""))
+  if(!is.na(videoDur)){
+    fuzz <- 0.5
+    if(mocapDur > videoDur+fuzz){
+      warning(paste("The motion capture data (",as.character(mocapDur)," seconds) is longer than the video data (",as.character(videoDur)," seconds). This is a sign that there is a problem with alignment.", sep = ""))
+    } 
+    if(mocapDur+fuzz < videoDur){
+      warning(paste("The video data (",as.character(videoDur)," seconds) is longer than the motion capture data (",as.character(mocapDur)," seconds). This is a sign that there is a problem with alignment.", sep = ""))
+    }
+  } else {
+    warning("The video data duration could not be found. The motion capture and video durations were not checked against each other.")
   }
 
 

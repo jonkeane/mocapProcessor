@@ -10,6 +10,5 @@ library(devtools)
 
 load_all("./mocapProcessor")
 
-mainFunc(cmdArgs)
-#print(videoLength("~/Desktop/ASLR/Annotations/robinCELEXclip6.mp4"))
+mainFunc(cmdArgs) -> output
 

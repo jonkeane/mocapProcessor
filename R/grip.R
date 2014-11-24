@@ -26,6 +26,21 @@ calculateDistances <- function(data, markers){
   dfOut
 }
 
+meanOnAxis <- function(data, markers, axis){
+  means <- c()
+  for(m in 1:length(data$times)) {
+    points <- c()
+    for(marker in markers){
+      points <- append(points, data[m,paste(axis, marker ,sep="")])
+    }
+    means <- append(means, as.numeric(mean(points, na.rm=TRUE)))
+  }
+  dfOut <- data
+  label <- paste("mean",axis,paste(markers, collapse="-"), sep="-")
+  dfOut[,label] <- means
+  dfOut
+}
+
 # A gross alignment function that looks for and finds peaks that are over the threshold amplitude
 alignGross <- function(distances, times, firstOpen=TRUE, openThreshold = 50){
   if(length(distances)!=length(times)){
@@ -116,12 +131,13 @@ clipper <- function(data, verbose=FALSE, parallel=TRUE){
   
   filteredMarkerData <- markerRead(file = file, verbose=FALSE)
   
-  filteredMarkers <- extractMarkers(filteredMarkerData, c(0,1,5,6,7,8,9,10,11,12)) 
+  filteredMarkers <- extractMarkers(filteredMarkerData, c(0,1,2,3,4,5,6,7,8,9,10,11,12)) 
   filteredMarkers <- calculateDistances(filteredMarkers, c(5,7))
   filteredMarkers <- calculateDistances(filteredMarkers, c(6,8))
   filteredMarkers <- calculateDistances(filteredMarkers, c(10,11))
   filteredMarkers <- calculateDistances(filteredMarkers, c(9,12))
   filteredMarkers <- calculateDistances(filteredMarkers, c(0,1))
+  filteredMarkers <- meanOnAxis(filteredMarkers, c(0,1,2,3,4), axis="Y")
   
   # average the clapper marker distances
   filteredMarkers$clapperState <- apply(subset(filteredMarkers, select = c(`5-7`,`6-8`,`10-11`,`9-12`)), 1, mean, na.rm=T)
