@@ -13,4 +13,3 @@ install.packages("./mocapProcessor", repos = NULL, type="source")
 library(mocapProcessor)
 
 mainFunc(cmdArgs) -> output
-

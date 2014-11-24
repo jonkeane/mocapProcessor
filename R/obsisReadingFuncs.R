@@ -63,7 +63,7 @@ countOccluded <- function(data, verbose=FALSE){
 ffmpegDurParse <- function(ffmpegout){
   # extract the line with duration in it, and then turn extract the time
   durline <- ffmpegout[grepl(".*Duration: (.*), start.*", ffmpegout)]
-  if(any(durline)){
+  if(length(durline)>0){
     dur <- gsub(".*Duration: (.*), start.*","\\1", durline)
     # split on colons, delist
     dur <- as.numeric(strsplit(dur, ":")[[1]])
