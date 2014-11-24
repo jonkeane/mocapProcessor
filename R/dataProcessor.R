@@ -28,7 +28,19 @@ main <- function(videoFile){
    grip <- paste('{"name": "grip", "column": ',which( colnames(markerData)=="0-1" )-1,', "min":',min(markerData$`0-1`, na.rm=TRUE),', "max":',max(markerData$`0-1`, na.rm=TRUE),'}', sep='')
   clapper <- paste('{"name": "clapper", "column": ',which( colnames(markerData)=="clapperState" )-1,', "min":',min(markerData$clapperState, na.rm=TRUE),', "max":',max(markerData$clapperState, na.rm=TRUE),'}', sep='')  
   tracks <- paste('"tracks" : [',grip,',',clapper,']')
-  
+
+  # check the times of the mocap data and the video data
+  mocapDur <- max(markerData$times)
+  videoDur <- videoLength(shQuote(videoFile))
+  fuzz <- 0.5
+  if(mocapDur > videoDur+fuzz){
+    warning(paste("The motion capture data (",as.character(mocapDur)," seconds) is longer than the video data (",as.character(videoDur)," seconds). This is a sign that there is a problem with alignment.", sep = ""))
+  } 
+  if(mocapDur+fuzz < videoDur){
+    warning(paste("The video data (",as.character(videoDur)," seconds) is longer than the motion capture data (",as.character(mocapDur)," seconds). This is a sign that there is a problem with alignment.", sep = ""))
+  }
+
+
   pathToElanGen <- system.file("exec/pyelan/elanGen.py", package = "mocapProcessor", mustWork=TRUE)
 
   call <- paste("python ",pathToElanGen," \"",videoFile,"\" \"",elanDir,"\" \'[{\"file\" : \"",paste(csvDir, "/", paste(df$subj, df$session, df$trial,sep="-"),".csv", sep=""),"\", ",tracks,"}]\'", sep="")

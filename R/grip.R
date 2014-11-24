@@ -1,7 +1,4 @@
 
-
-############### from grip.R
-
 extractMarkers <- function(data, markers, verbose=FALSE){
   dataNew <- data
   dfOut <- data.frame(times = as.numeric(unlist(dataNew["Time..sec."]))-min(unlist(dataNew["Time..sec."])))
@@ -120,10 +117,6 @@ clipper <- function(data, verbose=FALSE, parallel=TRUE){
   filteredMarkerData <- markerRead(file = file, verbose=FALSE)
   
   filteredMarkers <- extractMarkers(filteredMarkerData, c(0,1,5,6,7,8,9,10,11,12)) 
-  # filteredMarkers <- calculateDistances(filteredMarkers, c(5,6))
-  # filteredMarkers <- calculateDistances(filteredMarkers, c(6,7))
-  # filteredMarkers <- calculateDistances(filteredMarkers, c(8,9))
-  # filteredMarkers <- calculateDistances(filteredMarkers, c(9,10))
   filteredMarkers <- calculateDistances(filteredMarkers, c(5,7))
   filteredMarkers <- calculateDistances(filteredMarkers, c(6,8))
   filteredMarkers <- calculateDistances(filteredMarkers, c(10,11))
@@ -142,12 +135,22 @@ clipWriter <- function(data, subjDir) {
   subj <- data[["subj"]]
   session <- data[["session"]]
   trial <- data[["trial"]]
+  message(paste("Starting on:",paste(exp,subj,session,trial,sep="-"),sep=" "))
+
   alignedMarkers <- clipper(data)
   outFilename <- paste(subjDir, "/", paste(subj, session, trial,sep="-"),".csv", sep="")
   write.csv(alignedMarkers, file = outFilename, row.names = FALSE)
   
-  print(paste("Wrote file: ",outFilename,sep=""))
+#   message(paste("Wrote file: ",outFilename,sep=""))
+  message(paste("Finished with:",paste(exp,subj,session,trial,sep="-"),sep=" "))
   if(exists("twtrNotify")){twtrNotify(paste(subj, session, trial,sep="-"))}
   
   alignedMarkers
+}
+
+
+mainFunc <- function(files, dirPath = "."){
+  # dir.create(paste(dirPath,"savedData",sep="/"), recursive=TRUE, showWarnings=FALSE) # maybe not needed?
+  
+  lapply(files, main)
 }

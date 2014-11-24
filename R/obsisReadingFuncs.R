@@ -60,6 +60,39 @@ countOccluded <- function(data, verbose=FALSE){
 }
 
 
+ffmpegDurParse <- function(ffmpegout){
+  # extract the line with duration in it, and then turn extract the time
+  durline <- ffmpegout[grepl(".*Duration: (.*), start.*", ffmpegout)]
+  dur <- gsub(".*Duration: (.*), start.*","\\1", durline)
+  # split on colons, delist
+  dur <- as.numeric(strsplit(dur, ":")[[1]])
+  # turn hours, min, sec.msec into seconds
+  dur <- dur[1]*60*60+dur[2]*60+dur[3]
+  dur
+}
+
+videoLength <- function(file){
+  call <- paste("ffmpeg", "-i", file, "2>&1", sep=" ")
+  length <- tryCatch({
+    
+    ffmpegout <- system(call, intern=TRUE)
+    
+    return(ffmpegDurParse(ffmpegout))
+  }, error=function(cond) {
+    message(paste(call, "does not seem to exist."))
+    message("Here's the original error message:")
+    message(cond)
+    # Choose a return value in case of error
+    return(NA)
+  }, warning=function(cond) {
+    # ffmpeg throws a warning when there is no output, maybe change the call to something else?
+    suppressWarnings({
+      ffmpegout <- system(call, intern=TRUE)
+    })
+        
+    return(ffmpegDurParse(ffmpegout))
+  })
+}
 
 
 
