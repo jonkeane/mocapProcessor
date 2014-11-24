@@ -1,0 +1,3 @@
+[submodule "exec/pyelan"]
+	path = exec/pyelan
+	url = https://github.com/jonkeane/pyelan.git
