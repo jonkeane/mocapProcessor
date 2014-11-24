@@ -6,9 +6,10 @@
 
 cmdArgs <- commandArgs(trailingOnly = TRUE)
 
-library(devtools)
+# library(devtools)
+# load_all("./mocapProcessor")
 
-load_all("./mocapProcessor")
+install.packages("./mocapProcessor", repos = NULL, type="source")
 
 mainFunc(cmdArgs) -> output
 
