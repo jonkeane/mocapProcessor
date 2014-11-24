@@ -1,0 +1,3 @@
+[submodule "inst/pyelan"]
+	path = inst/pyelan
+	url = https://github.com/jonkeane/pyelan.git
