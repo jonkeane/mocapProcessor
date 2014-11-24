@@ -64,14 +64,14 @@ ffmpegDurParse <- function(ffmpegout){
   # extract the line with duration in it, and then turn extract the time
   durline <- ffmpegout[grepl(".*Duration: (.*), start.*", ffmpegout)]
   if(any(durline)){
-    warning("ffmpeg couldn't find any lines with a duration.")
-    dur <- NA
-  } else {
     dur <- gsub(".*Duration: (.*), start.*","\\1", durline)
     # split on colons, delist
     dur <- as.numeric(strsplit(dur, ":")[[1]])
     # turn hours, min, sec.msec into seconds
     dur <- dur[1]*60*60+dur[2]*60+dur[3]
+  } else {
+    warning("ffmpeg couldn't find any lines with a duration.")
+    dur <- NA
   }
   dur
 }
