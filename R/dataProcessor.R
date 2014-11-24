@@ -46,7 +46,7 @@ main <- function(videoFile){
   }
 
 
-  pathToElanGen <- system.file("exec/pyelan/elanGen.py", package = "mocapProcessor", mustWork=TRUE)
+  pathToElanGen <- system.file("pyelan/elanGen.py", package = "mocapProcessor", mustWork=TRUE)
 
   call <- paste("python ",pathToElanGen," \"",videoFile,"\" \"",elanDir,"\" \'[{\"file\" : \"",paste(csvDir, "/", paste(df$subj, df$session, df$trial,sep="-"),".csv", sep=""),"\", ",tracks,"}]\'", sep="")
   
