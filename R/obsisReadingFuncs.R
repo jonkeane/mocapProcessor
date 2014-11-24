@@ -77,7 +77,7 @@ ffmpegDurParse <- function(ffmpegout){
 }
 
 videoLength <- function(file){
-  call <- paste("ffmpeg", "-i", file, "2>&1", sep=" ")
+  call <- paste("ffprobe", file, "2>&1", sep=" ")
   length <- tryCatch({
     
     ffmpegout <- system(call, intern=TRUE)
@@ -90,12 +90,15 @@ videoLength <- function(file){
     # Choose a return value in case of error
     return(NA)
   }, warning=function(cond) {
-    # ffmpeg throws a warning when there is no output, maybe change the call to something else?
-    suppressWarnings({
-      ffmpegout <- system(call, intern=TRUE)
-    })
-        
-    return(ffmpegDurParse(ffmpegout))
+    message(paste(call, "had a warning."))
+    message("Here's the original error message:")
+    message(cond)
+    return(NA)
+#     # ffmpeg throws a warning when there is no output, maybe change the call to something else?
+#     suppressWarnings({
+#       ffmpegout <- system(call, intern=TRUE)
+#     })
+#     return(ffmpegDurParse(ffmpegout))
   })
 }
 
