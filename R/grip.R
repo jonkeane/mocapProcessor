@@ -14,6 +14,7 @@ extractMarkers <- function(data, markers, verbose=FALSE){
 }
 
 calculateDistances <- function(data, markers){
+  # this could be changed to dplyr?
   dists <- c()
   for(m in 1:length(data$times)) {
     mOne <- c(data[m,paste("X", markers[1] ,sep="")], data[m,paste("Y", markers[1] ,sep="")], data[m,paste("Z", markers[1] ,sep="")])
@@ -27,6 +28,7 @@ calculateDistances <- function(data, markers){
 }
 
 meanOnAxis <- function(data, markers, axis){
+  # this could be changed to dplyr?
   means <- c()
   for(m in 1:length(data$times)) {
     points <- c()
