@@ -44,7 +44,7 @@ meanOnAxis <- function(data, markers, axis){
 }
 
 # A gross alignment function that looks for and finds peaks that are over the threshold amplitude
-alignGross <- function(distances, times, firstOpen=TRUE, openThreshold = 50){
+alignGross <- function(distances, times, firstOpen=TRUE, openThreshold = 100){
   if(length(distances)!=length(times)){
     stop("Error, the distances and times are not of the same length.")
   }
@@ -125,11 +125,11 @@ align <- function(data, windowWidth=10, verbose=TRUE, offset=0){
 	nClapperStates <- 2
   }
   
-  minTime <- minThresh(distances , times, min(times[clapperStates==1 & !is.na(clapperStates)], na.rm = FALSE), verbose=TRUE)
+  minTime <- minThresh(distances , times, windowWidth=windowWidth, min(times[clapperStates==1 & !is.na(clapperStates)], na.rm = FALSE), verbose=TRUE)
   if(nClapperStates == 1) {
 	maxTime <- max(times)
   } else {
-	maxTime <- minThresh(distances, times, max(times[clapperStates==1 & !is.na(clapperStates)], na.rm = FALSE), direction="forward", verbose=verbose)
+	maxTime <- minThresh(distances, times, windowWidth=windowWidth, max(times[clapperStates==1 & !is.na(clapperStates)], na.rm = FALSE), direction="forward", verbose=verbose)
   }
   
   if(verbose){
