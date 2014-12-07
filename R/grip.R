@@ -48,16 +48,12 @@ alignGross <- function(distances, times, firstOpen=TRUE, openThreshold = 50){
   }
   # check the number of transitions at the threshold, if over 2, error.
   clapperOpen <- ifelse(distances>openThreshold, 1, 0)
-  clapperOpenTrans <- table(paste0(head(clapperOpen,-1),tail(clapperOpen,-1)))
-  if(clapperOpenTrans["01"]!=2 & clapperOpenTrans["10"]!=2) {
-    warning("Warning, there are more than or less than two open states. Try adjusting the threshold up or down.")
-  }
   if(any(is.na(clapperOpen))) {
     numNAs <- sum(is.na(clapperOpen))
     warning(paste("Warning, there are ",numNAs," NAs in the clapper state. If this number is sufficiently low, this might not be a problem.", sep = ""))
   }
   
-  ifelse(firstOpen,min(times[clapperOpen==1 & !is.na(clapperOpen)], na.rm = FALSE),max(times[clapperOpen==1 & !is.na(clapperOpen)], na.rm = FALSE))
+  clapperOpen
 }
 
 # alignGross(filteredMarkers$clapperState , filteredMarkers$times)
@@ -112,8 +108,28 @@ minThresh <- function(distances, times, start, direction="backward", windowWidth
 align <- function(data, windowWidth=10, verbose=TRUE, offset=0){
   times <- data$times
   distances <- data$clapperState
-  minTime <- minThresh(distances , times, alignGross(distances , times), verbose=verbose)
-  maxTime <- minThresh(distances, times, alignGross(distances , times, firstOpen=FALSE), direction="forward", verbose=verbose)
+  
+  
+  clapperStates <- alignGross(distances , times)
+  
+  clapperOpenTrans <- table(paste0(head(clapperStates,-1),tail(clapperStates,-1)))
+  if(clapperOpenTrans["01"]+clapperOpenTrans["10"]<4) {
+    warning("Warning, there are less than two open states on the clapper. Using the only state as the beginning of the clip.")
+	nClapperStates <- 1
+  } else if(clapperOpenTrans["01"]+clapperOpenTrans["10"]>4) {
+  	nClapperStates <- (clapperOpenTrans["01"]+clapperOpenTrans["10"])/2
+    warning(paste("Warning, there are ",nClapperStates," open states on the clapper. Using the first and the last states for clipping. Try adjusting the threshold up or down.", sep=""))
+  } else {
+	nClapperStates <- 2
+  }
+  
+  minTime <- minThresh(distances , times, min(times[clapperStates==1 & !is.na(clapperStates)], na.rm = FALSE), verbose=TRUE)
+  if(nClapperStates == 1) {
+	maxTime <- max(times)
+  } else {
+	maxTime <- minThresh(distances, times, max(times[clapperStates==1 & !is.na(clapperStates)], na.rm = FALSE), direction="forward", verbose=verbose)
+  }
+  
   if(verbose){
     plot(data$times, data$clapperState, type="l")
     points(x=minTime, data$clapperState[data$times==minTime])
