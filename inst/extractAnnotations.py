@@ -43,8 +43,14 @@ for eafFile in eafFiles:
     csvfile = open(relPathCSV, 'r')
     reader = csv.DictReader(csvfile)
     csvData = []
+    if ts.timeOrigin:
+        offset = ts.timeOrigin/1000.
+    else:
+        offset = 0
     for row in reader:
-        csvData.append((float(row['times']), (row['0-1'], row['mean-Y-0-1-2-3-4'])))
+        csvData.append((float(row['times'])-offset, (row['0-1'], row['mean-Y-0-1-2-3-4'])))
+
+        
         
     
     colNames = [anno[0] for anno in annos]
