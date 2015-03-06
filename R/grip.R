@@ -114,8 +114,8 @@ align <- function(data, windowWidth=10, verbose=TRUE, offset=0){
   
   clapperStates <- alignGross(distances , times)
   
-  if(any(is.inf(clapperStates))) {
-    numInfss <- sum(is.inf(clapperStates))
+  if(any(is.infinite(clapperStates))) {
+    numInfss <- sum(is.infinite(clapperStates))
     warning(paste("Warning, there are ",numInfss," Infinitys in the clapper state. If this number is sufficiently low, this might not be a problem.", sep = ""))
 	clapperStates <- ifelse(is.inf(clapperStates),NA,clapperStates)
   }
