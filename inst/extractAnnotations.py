@@ -10,8 +10,8 @@ warnings.formatwarning = custom_formatwarning
 def actionCheck(trialType, condition):
     if trialType[0] != "ACTION":
         warnings.warn("The first trial type is not ACTION in "+str(condition)+". In the file "+eafFile)    
-    actionPeriods = ['EYESCLOSED', 'OBSERVE', 'GRIP', 'MOVEMENT', 'RELEASE']
     actionPeriods = ['OBSERVE', 'GRIP', 'MOVEMENT', 'RELEASE']
+    actionPeriods = ['EYESCLOSED', 'OBSERVE', 'GRIP', 'MOVEMENT', 'RELEASE']
     if [period for period in trialType[2]] != actionPeriods: 
         raise Exception("The periods for action do not contain "+str(actionPeriods)+" "+str(condition)+". In the file "+eafFile)
         
@@ -35,12 +35,12 @@ def estimationCheck(trialType, condition):
     if condition[3][0] != "ESTIMATION":
         raise Exception("The third trial type is not ESTIMATION in "+str(condition)+". In the file "+eafFile)
     possEstPeriods = [
-        ['EYESCLOSED', 'OBSERVE', 'PREPARE', 'STEADY', 'TRANSITION', 'GRIP', 'MOVEMENT', 'RELEASE'],
-        ['EYESCLOSED', 'OBSERVE', 'PREPARE', 'STEADY', 'TRANSITION-GRIP', 'MOVEMENT', 'RELEASE']
-        ]
-    possEstPeriods = [
         ['OBSERVE', 'PREPARE', 'STEADY', 'TRANSITION', 'GRIP', 'MOVEMENT', 'RELEASE'],
         ['OBSERVE', 'PREPARE', 'STEADY', 'TRANSITION-GRIP', 'MOVEMENT', 'RELEASE']
+        ]
+    possEstPeriods = [
+        ['EYESCLOSED', 'OBSERVE', 'PREPARE', 'STEADY', 'TRANSITION', 'GRIP', 'MOVEMENT', 'RELEASE'],
+        ['EYESCLOSED', 'OBSERVE', 'PREPARE', 'STEADY', 'TRANSITION-GRIP', 'MOVEMENT', 'RELEASE']
         ]
     if [period for period in condition[3][2]] not in possEstPeriods: 
         raise Exception("The periods for estimation are not correct "+str(condition)+". In the file "+eafFile)    
@@ -48,8 +48,8 @@ def estimationCheck(trialType, condition):
 def actionCheck(trialType,condition):
     if trialType[0] != "ACTION":
         warnings.warn("The first trial type is not ACTION in "+str(condition)+". In the file "+eafFile)    
-    actionPeriods = ['EYESCLOSED', 'OBSERVE', 'GRIP', 'MOVEMENT', 'RELEASE']
     actionPeriods = ['OBSERVE', 'GRIP', 'MOVEMENT', 'RELEASE']
+    actionPeriods = ['EYESCLOSED', 'OBSERVE', 'GRIP', 'MOVEMENT', 'RELEASE']
     if [period for period in trialType[2]] != actionPeriods: 
         raise Exception("The periods for action do not contain "+str(actionPeriods)+" "+str(condition)+". In the file "+eafFile)
 
