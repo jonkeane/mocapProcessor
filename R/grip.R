@@ -114,6 +114,12 @@ align <- function(data, windowWidth=10, verbose=TRUE, offset=0){
   
   clapperStates <- alignGross(distances , times)
   
+  if(any(is.inf(clapperStates))) {
+    numInfss <- sum(is.inf(clapperStates))
+    warning(paste("Warning, there are ",numInfss," Infinitys in the clapper state. If this number is sufficiently low, this might not be a problem.", sep = ""))
+	clapperStates <- ifelse(is.inf(clapperStates),NA,clapperStates)
+  }
+  
   clapperOpenTrans <- table(paste0(head(clapperStates,-1),tail(clapperStates,-1)))
   if(clapperOpenTrans["01"]+clapperOpenTrans["10"]<4) {
     warning("Warning, there are less than two open states on the clapper. Using the only state as the beginning of the clip.")
