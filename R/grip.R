@@ -52,7 +52,7 @@ alignGross <- function(distances, times, firstOpen=TRUE, openThreshold = 100){
   # check if there are any infinite states in the clapper state.
   if(any(is.infinite(distances))) {
     numInfss <- sum(is.infinite(distances))
-    warning(paste("Warning, there are ",numInfss," Infinitys in the clapper state. If this number is sufficiently low, this might not be a problem.", sep = ""))
+    warning(paste("Warning, there are ",numInfss," infinities in the clapper state. If this number is sufficiently low, this might not be a problem.", sep = ""))
 	distances <- ifelse(is.infinite(distances),NA,distances)
   }
     
