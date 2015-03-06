@@ -1,5 +1,16 @@
 ############### from dataProcessor.R
 
+# returns the max that is not infinity for when the mocap data returns infinty
+maxNotInf <- function(vector, ...){
+  	vector <- ifelse(is.infinite(vector),NA,vector)
+	max(vector, ...)
+}
+
+# returns the min that is not infinity for when the mocap data returns (negative) infinty
+minNotInf <- function(vector, ...){
+  	vector <- ifelse(is.infinite(vector),NA,vector)
+	min(vector, ...)
+}
 
 main <- function(videoFile){
   # runs through the video files, find csvs in the GRIP folder, generate csvs, generate elan files
@@ -25,13 +36,13 @@ main <- function(videoFile){
   
   markerData <- clipWriter(data=df, subjDir=csvDir)
   # "tracks" : [{"name": "clapper", "column": 36, "min":0, "max":200}]
-   grip <- paste('{"name": "grip", "column": ',which( colnames(markerData)=="0-1" )-1,', "min":',min(markerData$`0-1`, na.rm=TRUE),', "max":',max(markerData$`0-1`, na.rm=TRUE),'}', sep='')
-  clapper <- paste('{"name": "clapper", "column": ',which( colnames(markerData)=="clapperState" )-1,', "min":',min(markerData$clapperState, na.rm=TRUE),', "max":',max(markerData$clapperState, na.rm=TRUE),'}', sep='')  
-  meanY <- paste('{"name": "meanY", "column": ',which( colnames(markerData)=="mean-Y-0-1-2-3-4" )-1,', "min":',min(markerData$`mean-Y-0-1-2-3-4`, na.rm=TRUE),', "max":',max(markerData$`mean-Y-0-1-2-3-4`, na.rm=TRUE),'}', sep='')
+   grip <- paste('{"name": "grip", "column": ',which( colnames(markerData)=="0-1" )-1,', "min":',minNotInf(markerData$`0-1`, na.rm=TRUE),', "max":',maxNotInf(markerData$`0-1`, na.rm=TRUE),'}', sep='')
+  clapper <- paste('{"name": "clapper", "column": ',which( colnames(markerData)=="clapperState" )-1,', "min":',minNotInf(markerData$clapperState, na.rm=TRUE),', "max":',maxNotInf(markerData$clapperState, na.rm=TRUE),'}', sep='')  
+  meanY <- paste('{"name": "meanY", "column": ',which( colnames(markerData)=="mean-Y-0-1-2-3-4" )-1,', "min":',minNotInf(markerData$`mean-Y-0-1-2-3-4`, na.rm=TRUE),', "max":',maxNotInf(markerData$`mean-Y-0-1-2-3-4`, na.rm=TRUE),'}', sep='')
   tracks <- paste('"tracks" : [',grip,',',clapper,',',meanY,']')
-
+  
   # check the times of the mocap data and the video data
-  mocapDur <- max(markerData$times)
+  mocapDur <- maxNotInf(markerData$times)
   videoDur <- videoLength(shQuote(videoFile))
   if(!is.na(videoDur)){
     fuzz <- 0.5

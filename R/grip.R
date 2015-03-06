@@ -48,12 +48,21 @@ alignGross <- function(distances, times, firstOpen=TRUE, openThreshold = 100){
   if(length(distances)!=length(times)){
     stop("Error, the distances and times are not of the same length.")
   }
+  
+  # check if there are any infinite states in the clapper state.
+  if(any(is.infinite(distances))) {
+    numInfss <- sum(is.infinite(distances))
+    warning(paste("Warning, there are ",numInfss," Infinitys in the clapper state. If this number is sufficiently low, this might not be a problem.", sep = ""))
+	distances <- ifelse(is.infinite(distances),NA,distances)
+  }
+    
   # check the number of transitions at the threshold, if over 2, error.
   clapperOpen <- ifelse(distances>openThreshold, 1, 0)
   if(any(is.na(clapperOpen))) {
     numNAs <- sum(is.na(clapperOpen))
     warning(paste("Warning, there are ",numNAs," NAs in the clapper state. If this number is sufficiently low, this might not be a problem.", sep = ""))
   }
+
   
   clapperOpen
 }
@@ -113,12 +122,7 @@ align <- function(data, windowWidth=10, verbose=TRUE, offset=0){
   
   
   clapperStates <- alignGross(distances , times)
-  
-  if(any(is.infinite(clapperStates))) {
-    numInfss <- sum(is.infinite(clapperStates))
-    warning(paste("Warning, there are ",numInfss," Infinitys in the clapper state. If this number is sufficiently low, this might not be a problem.", sep = ""))
-	clapperStates <- ifelse(is.inf(clapperStates),NA,clapperStates)
-  }
+
   
   clapperOpenTrans <- table(paste0(head(clapperStates,-1),tail(clapperStates,-1)))
   if(clapperOpenTrans["01"]+clapperOpenTrans["10"]<4) {
