@@ -57,7 +57,7 @@ def annoChecker(annos, eafFile):
     annoVals = [x[0] for x in annos]
     
     # annotations must match this pattern
-    pattern = re.compile('(\d) +(ACTION|GESTURE|ESTIMATION) *([R|L|x|X]?) +(OBSERVE|GRIP|MOVEMENT|RELEASE|PLANNING|PREPARE|STEADY|TRANSITION|UNCODABLE) *(CLOSED|OPEN|OPEN-CLOSED|CLOSED-OPEN)?')
+    pattern = re.compile('(\d) +(ACTION|GESTURE|ESTIMATION) +(R|L|x|X) +(OBSERVE|GRIP|MOVEMENT|RELEASE|PLANNING|PREPARE|STEADY|TRANSITION|UNCODABLE) *(CLOSED|OPEN|OPEN-CLOSED|CLOSED-OPEN)?')
     
     # setup a list of lists that has the structure of the experiment
     # annoStruct = [[condition, [type, side, [periods]]]]
@@ -69,7 +69,7 @@ def annoChecker(annos, eafFile):
         try:
             condition = match.group(1)
             typ = match.group(2)
-            side = match.group(3) # does side need to be checked?
+            side = match.group(3)
             period = match.group(4)
             gripType = match.group(5) # does gripType need to be checked? probably to make sure it coocurs with movement only
         except AttributeError:
