@@ -17,9 +17,9 @@ main <- function(videoFile){
   # Change the warn option so that warnings are displayd along with progress. There should be a better way to do this...
   oldWarn <- getOption("warn")
   options(warn = 1)
-  
+
   base <- strsplit(tail(strsplit(videoFile, "/", fixed=TRUE)[[1]], 1), ".", fixed=TRUE)[[1]][1]
-  df <- data.frame(Experiment="GRIP", 
+  df <- data.frame(Experiment="GRIP",
   subj = strsplit(base, "-", fixed=TRUE)[[1]][1],
   session = strsplit(base, "-", fixed=TRUE)[[1]][2],
   trial = strsplit(base, "-", fixed=TRUE)[[1]][3])
@@ -27,20 +27,20 @@ main <- function(videoFile){
 
 #   csvDir <- paste(dirPath,"mocapCSVs",unique(df$subj),sep="/")
   csvDir <- paste("mocapCSVs",unique(df$subj),sep="/")
-  
+
   dir.create(csvDir, recursive=TRUE, showWarnings=FALSE)
 
 #   elanDir <- paste(dirPath,"elanFilesOut",unique(df$subj),sep="/")
   elanDir <- paste("elanFilesOut",unique(df$subj),sep="/")
   dir.create(elanDir, recursive=TRUE, showWarnings=FALSE)
-  
+
   markerData <- clipWriter(data=df, subjDir=csvDir)
   # "tracks" : [{"name": "clapper", "column": 36, "min":0, "max":200}]
    grip <- paste('{"name": "grip", "column": ',which( colnames(markerData)=="0-1" )-1,', "min":',minNotInf(markerData$`0-1`, na.rm=TRUE),', "max":',maxNotInf(markerData$`0-1`, na.rm=TRUE),'}', sep='')
-  clapper <- paste('{"name": "clapper", "column": ',which( colnames(markerData)=="clapperState" )-1,', "min":',minNotInf(markerData$clapperState, na.rm=TRUE),', "max":',maxNotInf(markerData$clapperState, na.rm=TRUE),'}', sep='')  
+  clapper <- paste('{"name": "clapper", "column": ',which( colnames(markerData)=="clapperState" )-1,', "min":',minNotInf(markerData$clapperState, na.rm=TRUE),', "max":',maxNotInf(markerData$clapperState, na.rm=TRUE),'}', sep='')
   meanY <- paste('{"name": "meanY", "column": ',which( colnames(markerData)=="mean-Y-0-1-2-3-4" )-1,', "min":',minNotInf(markerData$`mean-Y-0-1-2-3-4`, na.rm=TRUE),', "max":',maxNotInf(markerData$`mean-Y-0-1-2-3-4`, na.rm=TRUE),'}', sep='')
   tracks <- paste('"tracks" : [',grip,',',clapper,',',meanY,']')
-  
+
   # check the times of the mocap data and the video data
   mocapDur <- maxNotInf(markerData$times)
   videoDur <- videoLength(shQuote(videoFile))
@@ -48,7 +48,7 @@ main <- function(videoFile){
     fuzz <- 0.5
     if(mocapDur > videoDur+fuzz){
       warning(paste("The motion capture data (",as.character(mocapDur)," seconds) is longer than the video data (",as.character(videoDur)," seconds). This is a sign that there is a problem with alignment.", sep = ""))
-    } 
+    }
     if(mocapDur+fuzz < videoDur){
       warning(paste("The video data (",as.character(videoDur)," seconds) is longer than the motion capture data (",as.character(mocapDur)," seconds). This is a sign that there is a problem with alignment.", sep = ""))
     }
@@ -59,10 +59,22 @@ main <- function(videoFile){
 
   pathToElanGen <- system.file("pyelan/elanGen.py", package = "mocapProcessor", mustWork=TRUE)
 
-  call <- paste("python ",pathToElanGen," \"",videoFile,"\" \"",elanDir,"\" \'[{\"file\" : \"",paste(csvDir, "/", paste(df$subj, df$session, df$trial,sep="-"),".csv", sep=""),"\", ",tracks,"}]\'", sep="")
-  
+  elanBasename <- base
+
+  # find video files that match the video file supplied
+  videoFilePaths <- list.files(path = dirname(videoFile), pattern=substr(basename(videoFile), 1, nchar(basename(videoFile)) - 4), full.names = TRUE)
+
+  audioDir <- gsub("Clipped Video", "AUDIO", dirname(videoFile))
+  audioFilePaths <- list.files(path = audioDir, pattern=substr(basename(videoFile), 1, nchar(basename(videoFile)) - 4), full.names = TRUE)
+
+  mediaPaths <- c(videoFilePaths,audioFilePaths)
+  media <- paste('["',paste(mediaPaths, collapse='","'),'"]', sep='')
+
+  call <- paste("python ",pathToElanGen," \"",elanDir,"\" \"",elanBasename,"\" \'",media,"\'"," \'[{\"file\" : \"",paste(csvDir, "/", paste(df$subj, df$session, df$trial,sep="-"),".csv", sep=""),"\", ",tracks,"}]\'", sep="")
+
+  print(call)
+
   options(warn = oldWarn)
   system(call)
   call
 }
-
