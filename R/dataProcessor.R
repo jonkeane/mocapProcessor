@@ -72,8 +72,6 @@ main <- function(videoFile){
 
   call <- paste("python ",pathToElanGen," \"",elanDir,"\" \"",elanBasename,"\" \'",media,"\'"," \'[{\"file\" : \"",paste(csvDir, "/", paste(df$subj, df$session, df$trial,sep="-"),".csv", sep=""),"\", ",tracks,"}]\'", sep="")
 
-  print(call)
-
   options(warn = oldWarn)
   system(call)
   call
