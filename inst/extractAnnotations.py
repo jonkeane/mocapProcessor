@@ -1,6 +1,9 @@
 import sys, os, re, warnings, csv, itertools
 import pyelan.pyelan as pyelan
 
+# to check and extract annotations:
+# extratAnnotations.py [destDir] [eaffiles]
+
 # changes the behavior of warnings so that they alert and do not print the code being warned about.
 def custom_formatwarning(msg, *a):
     # ignore everything except the message
