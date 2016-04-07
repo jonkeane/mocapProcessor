@@ -19,34 +19,30 @@ def gestureCheck(trialType, condition):
     #     raise Exception("The second trial type is not GESTURE in "+str(condition)+". In the file "+eafFile)
     # setup two simple cases
     possGestPeriods = [
-        ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT', 'RELEASE'],
+        ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT OPEN', 'RELEASE'],
+        ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT CLOSED', 'RELEASE'],
+        ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT OPEN-CLOSED', 'RELEASE'],
         ['EYESCLOSED', 'NO GESTURE']
         ]
-    if [period for period in condition[2][2]] not in possGestPeriods:
-        # if condition[2][2][0] == 'EYESCLOSED' and condition[2][2][1] == 'PLANNING':
-        if condition[2][2][0] == 'PLANNING':
-            # look at the post planning periods and see if they are in the right order, and containing the right periods should be changed to 2 when adding eyesclosed
-            pers = ' '.join(condition[2][2][1:])
-            if not re.match("(GRIP)? ?(MOVEMENT)? ?(RELEASE)?", pers):
-                raise Exception("The periods for gesture are not correct "+str(condition)+". In the file "+eafFile)
+    if trialType[2] not in possGestPeriods:
+        raise Exception("The periods for gesture are not right. \n Expected:"+str(possGestPeriods)+"\n Found:   "+str(trialType[2])+"\n In the condition "+str(condition)+" the file "+eafFile)
 
 def estimationCheck(trialType, condition):
     # Checking the order does not currently work, because order has been shuffled.
     # if condition[3][0] != "ESTIMATION":
     #     raise Exception("The third trial type is not ESTIMATION in "+str(condition)+". In the file "+eafFile)
-    possEstPeriods = [['EYESCLOSED', 'OBSERVE', 'PREPARE', 'STEADY', 'TRANSITION', 'GRIP', 'MOVEMENT', 'RELEASE'],
-                      ['EYESCLOSED', 'OBSERVE', 'PREPARE', 'STEADY', 'TRANSITION', 'GRIP', 'MOVEMENT', 'RELEASE', 'EYESCLOSED'],
-                      ['EYESCLOSED', 'OBSERVE', 'PREPARE', 'STEADY', 'TRANSITION', 'GRIP', 'MOVEMENT', 'EYESCLOSED']]
+    # multiple possible estimation periods were used in the past, but are no longer used. THey are here in case they become useful in the future.
+    # possEstPeriods = [['EYESCLOSED', 'OBSERVE', 'PREPARE', 'STEADY', 'TRANSITION', 'GRIP', 'MOVEMENT', 'RELEASE'],
+    #                   ['EYESCLOSED', 'OBSERVE', 'PREPARE', 'STEADY', 'TRANSITION', 'GRIP', 'MOVEMENT', 'RELEASE', 'EYESCLOSED'],
+    #                   ['EYESCLOSED', 'OBSERVE', 'PREPARE', 'STEADY', 'TRANSITION', 'GRIP', 'MOVEMENT', 'EYESCLOSED']]
     possEstPeriods = [['EYESCLOSED', 'OBSERVE', 'PREPARE', 'STEADY', 'TRANSITION', 'GRIP', 'MOVEMENT', 'RELEASE']]
     if trialType[2] not in possEstPeriods:
         raise Exception("The periods for estimation are not right. \n Expected:"+str(possEstPeriods)+"\n Found:   "+str(trialType[2])+"\n In the condition "+str(condition)+" the file "+eafFile)
 
-        raise Exception("The periods for estimation are not correct "+str(condition)+". In the file "+eafFile)
-
 def actionCheck(trialType,condition):
-    # Checking the order does not currently work, because order has been shuffled.
-    if trialType[0] != "ACTION":
-        warnings.warn("The first trial type is not ACTION in "+str(condition)+". In the file "+eafFile)
+    # Checking the order of trial types is not currently working, most blocks will include all the same trial blocks.
+    # if trialType[0] != "ACTION":
+    #     warnings.warn("The first trial type is not ACTION in "+str(condition)+". In the file "+eafFile)
     actionPeriods = ['EYESCLOSED', 'OBSERVE', 'GRIP', 'MOVEMENT', 'RELEASE']
     if trialType[2] !=  actionPeriods:
         raise Exception("The periods for action are not right. \n Expected:"+str(actionPeriods)+"\n Found:   "+str(trialType[2])+"\n In the condition "+str(condition)+" the file "+eafFile)
@@ -55,7 +51,7 @@ def annoChecker(annos, eafFile, trialTypesPerTrial = 3):
     annoVals = [x[0] for x in annos]
 
     # annotations must match this pattern
-    pattern = re.compile('(\d+) +(ACTION|GESTURE|ESTIMATION) +(EYESCLOSED|OBSERVE|GRIP|MOVEMENT|RELEASE|PLANNING|PREPARE|STEADY|TRANSITION|UNCODABLE|NO GESTURE) *(CLOSED|OPEN|OPEN-CLOSED|CLOSED-OPEN)?')
+    pattern = re.compile('(\d+) +(ACTION|GESTURE|ESTIMATION) +(EYESCLOSED|OBSERVE|GRIP|MOVEMENT|RELEASE|PLANNING|PREPARE|STEADY|TRANSITION|UNCODABLE|NO GESTURE) *(CLOSED|OPEN|OPEN-CLOSED)?')
 
     # setup a list of lists that has the structure of the experiment
     # annoStruct = [[condition, [type, side, [periods]]]]
