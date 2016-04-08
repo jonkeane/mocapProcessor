@@ -22,6 +22,7 @@ def gestureCheck(trialType, condition):
     #     raise Exception("The second trial type is not GESTURE in "+str(condition)+". In the file "+eafFile)
     # setup two simple cases
     possGestPeriods = [
+        ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT', 'RELEASE'], # this shouldn't be possible, but currently we are accepting it.
         ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT OPEN', 'RELEASE'],
         ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT CLOSED', 'RELEASE'],
         ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT OPEN-CLOSED', 'RELEASE'],
@@ -70,7 +71,7 @@ def annoChecker(annos, eafFile, trialTypesPerTrial = 3):
             period = match.group(3)
             gripType = match.group(4) # does gripType need to be checked? probably to make sure it coocurs with movement only
         except AttributeError:
-            raise Exception("Could not parse the annotation values for the annotation: "+val+" In the file "+eafFile)
+            raise Exception("Could not parse the annotation values for the annotation: "+val+" In the file "+eafFile+" This likely means there is a typo or other error in annotations.")
 
         if annoStruct[-1][0] == condition:
             if annoStruct[-1][-1][0] == typ:
