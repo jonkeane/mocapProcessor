@@ -10,12 +10,12 @@ def custom_formatwarning(msg, *a):
     return str(msg) + '\n'
 warnings.formatwarning = custom_formatwarning
 
-def actionCheck(trialType, condition):
-    if trialType[0] != "ACTION":
-        warnings.warn("The first trial type is not ACTION in "+str(condition)+". In the file "+eafFile)
-    actionPeriods = ['EYESCLOSED', 'OBSERVE', 'GRIP', 'MOVEMENT', 'RELEASE']
-    if [period for period in trialType[2]] != actionPeriods:
-        warnings.warn("The periods for action do not contain "+str(actionPeriods)+" "+str(condition)+". In the file "+eafFile)
+# def actionCheck(trialType, condition):
+#     if trialType[0] != "ACTION":
+#         warnings.warn("The first trial type is not ACTION in "+str(condition)+". In the file "+eafFile)
+#     actionPeriods = ['EYESCLOSED', 'OBSERVE', 'GRIP', 'MOVEMENT', 'RELEASE']
+#     if [period for period in trialType[2]] != actionPeriods:
+#         warnings.warn("The periods for action do not contain "+str(actionPeriods)+" "+str(condition)+". In the file "+eafFile)
 
 def gestureCheck(trialType, condition, typ, eafFile):
     # generate a regualr expression for checking. First check if there is a no gesture annotation, if there isn't move from there
@@ -49,8 +49,9 @@ def actionCheck(trialType,condition):
 def annoChecker(annos, eafFile, trialTypesPerTrial = 3):
     annoVals = [x[0] for x in annos]
 
-    # annotations must match this pattern
-    pattern = re.compile('(\d+) +(ACTION|GESTURE|ESTIMATION) +(EYESCLOSED|OBSERVE|GRIP|MOVEMENT|RELEASE|PLANNING|PREPARE|STEADY|TRANSITION|UNCODABLE|NO GESTURE) *(CLOSED|OPEN|OPEN-CLOSED)?')
+    # annotations must match this pattern, there is a strict pattern and a less strict. The less strict should be fine given that each annotaiton is additionally tested later. This gives better warning messages.
+    # pattern = re.compile('(\d+) +(ACTION|GESTURE|ESTIMATION) +(EYESCLOSED|OBSERVE|GRIP|MOVEMENT|RELEASE|PLANNING|PREPARE|STEADY|TRANSITION|UNCODABLE|NO GESTURE) *(CLOSED|OPEN|OPEN-CLOSED)?')
+    pattern = re.compile('(\d+) +(\w+) +(\w+) *(\w+)?')
 
     # setup a list of lists that has the structure of the experiment
     # annoStruct = [[condition, [type, side, [periods]]]]
@@ -62,11 +63,12 @@ def annoChecker(annos, eafFile, trialTypesPerTrial = 3):
         try:
             condition = match.group(1)
             typ = match.group(2)
-            # side = match.group(3)
             period = match.group(3)
             gripType = match.group(4) # does gripType need to be checked? probably to make sure it coocurs with movement only
         except AttributeError:
             warnings.warn("Could not parse the annotation values for the annotation: "+val+" In the file "+eafFile+" This likely means there is a typo or other error in annotations.")
+
+
 
         if annoStruct[-1][0] == condition:
             if annoStruct[-1][-1][0] == typ:
