@@ -23,6 +23,7 @@ def gestureCheck(trialType, condition):
     # setup two simple cases
     possGestPeriods = [
         ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT', 'RELEASE'], # this shouldn't be possible, but currently we are accepting it.
+        # grip and release are optional
         ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT OPEN', 'RELEASE'],
         ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT CLOSED', 'RELEASE'],
         ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT OPEN-CLOSED', 'RELEASE'],
@@ -124,7 +125,9 @@ for eafFile in eafFiles:
     eafPath = os.path.dirname(eafFile)
     basename = os.path.splitext(os.path.basename(eafFile))[0]
     fl = pyelan.tierSet(file = eafFile)
-    fl.fixLinks(searchDir = os.path.sep.join([destDir,".."]))
+    fl.fixLinks(searchDir = os.path.sep.join([destDir,"..","Clipped Video"]))
+    fl.fixLinks(searchDir = os.path.sep.join([destDir,"..","AUDIO"]))
+    fl.fixLinks(searchDir = os.path.sep.join([destDir,"..","elanFilesCompleted"]))
 
     # find time series files that are linked to the eaf.
     tsconfs = filter(lambda s: re.match(".*tsconf.xml", s), fl.linkedFiles)
@@ -134,7 +137,7 @@ for eafFile in eafFiles:
     for tsconf in tsconfs:
         # this should only be one file for this data
         ts = pyelan.timeSeries(file = tsconf)
-        ts.fixLinks(searchDir = os.path.sep.join([destDir,".."]))
+        ts.fixLinks(searchDir = os.path.sep.join([destDir,"..","mocapCSVs"]))
 
     # extract the annotations from the overlaps tear
     annos = []
