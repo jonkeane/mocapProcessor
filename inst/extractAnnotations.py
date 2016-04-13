@@ -18,8 +18,6 @@ def actionCheck(trialType, condition):
         raise Exception("The periods for action do not contain "+str(actionPeriods)+" "+str(condition)+". In the file "+eafFile)
 
 def gestureCheck(trialType, condition, typ, eafFile):
-    print(trialType)
-    print(condition)
     # generate a regualr expression for checking. First check if there is a no gesture annotation, if there isn't move from there
     pattern = re.compile('(EYESCLOSED) *(NO GESTURE|.+)')
     match = pattern.match(' '.join(trialType[2]))
@@ -30,10 +28,10 @@ def gestureCheck(trialType, condition, typ, eafFile):
         subAnnos = match.group(2)
         match = pattern.match(subAnnos)
         if not match.group(1):
-            warnings.warn("There is no PLANNING period for condition"+str(typ)+" in file "+eafFile+" Condition:   "+str(condition[0])+" Trial types found: "+str(trialTypes))
+            warnings.warn("There is no PLANNING period for condition"+str(typ)+" in file "+eafFile+" Condition:   "+str(condition[0])+" Trial types found: "+str(trialTypes[2]))
 
         if not match.group(4):
-            warnings.warn("There is no OPEN, CLOSED, or OPEN-CLOSED period for condition"+str(typ)+" in file "+eafFile+" Condition:   "+str(condition[0])+" Trial types found: "+str(trialType))
+            warnings.warn("There is no OPEN, CLOSED, or OPEN-CLOSED period for condition"+str(typ)+" in file "+eafFile+" Condition:   "+str(condition[0])+" Trial types found: "+str(trialType[2]))
 
 
 
