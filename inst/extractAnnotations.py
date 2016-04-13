@@ -15,7 +15,7 @@ def actionCheck(trialType, condition):
         warnings.warn("The first trial type is not ACTION in "+str(condition)+". In the file "+eafFile)
     actionPeriods = ['EYESCLOSED', 'OBSERVE', 'GRIP', 'MOVEMENT', 'RELEASE']
     if [period for period in trialType[2]] != actionPeriods:
-        raise Exception("The periods for action do not contain "+str(actionPeriods)+" "+str(condition)+". In the file "+eafFile)
+        warnings.warn("The periods for action do not contain "+str(actionPeriods)+" "+str(condition)+". In the file "+eafFile)
 
 def gestureCheck(trialType, condition, typ, eafFile):
     # generate a regualr expression for checking. First check if there is a no gesture annotation, if there isn't move from there
@@ -31,44 +31,20 @@ def gestureCheck(trialType, condition, typ, eafFile):
             warnings.warn("There is no PLANNING period for condition"+str(typ)+" in file "+eafFile+" Condition:   "+str(condition[0])+" Trial types found: "+str(trialTypes[2]))
 
         if not match.group(4):
-            warnings.warn("There is no OPEN, CLOSED, or OPEN-CLOSED period for condition"+str(typ)+" in file "+eafFile+" Condition:   "+str(condition[0])+" Trial types found: "+str(trialType[2]))
+            warnings.warn("There is no OPEN, CLOSED, or OPEN-CLOSED annotation for condition"+str(typ)+" in file "+eafFile+" Condition:   "+str(condition[0])+" Trial types found: "+str(trialType[2]))
 
-
-
-
-
-
-    #
-    # possGestPeriods = [
-    #     # grip and release are optional
-    #     ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT OPEN', 'RELEASE'],
-    #     ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT CLOSED', 'RELEASE'],
-    #     ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT OPEN-CLOSED', 'RELEASE'],
-    #     ['EYESCLOSED', 'NO GESTURE']
-    #     ]
-    # if trialType[2] not in possGestPeriods:
-    #     raise Exception("The periods for gesture are not right. \n Expected:"+str(possGestPeriods)+"\n Found:   "+str(trialType[2])+"\n In the condition "+str(condition)+" the file "+eafFile)
 
 
 def estimationCheck(trialType, condition):
     # Checking the order does not currently work, because order has been shuffled.
-    # if condition[3][0] != "ESTIMATION":
-    #     raise Exception("The third trial type is not ESTIMATION in "+str(condition)+". In the file "+eafFile)
-    # multiple possible estimation periods were used in the past, but are no longer used. THey are here in case they become useful in the future.
-    # possEstPeriods = [['EYESCLOSED', 'OBSERVE', 'PREPARE', 'STEADY', 'TRANSITION', 'GRIP', 'MOVEMENT', 'RELEASE'],
-    #                   ['EYESCLOSED', 'OBSERVE', 'PREPARE', 'STEADY', 'TRANSITION', 'GRIP', 'MOVEMENT', 'RELEASE', 'EYESCLOSED'],
-    #                   ['EYESCLOSED', 'OBSERVE', 'PREPARE', 'STEADY', 'TRANSITION', 'GRIP', 'MOVEMENT', 'EYESCLOSED']]
     possEstPeriods = [['EYESCLOSED', 'OBSERVE', 'PREPARE', 'STEADY', 'TRANSITION', 'GRIP', 'MOVEMENT', 'RELEASE']]
     if trialType[2] not in possEstPeriods:
-        raise Exception("The periods for estimation are not right. \n Expected:"+str(possEstPeriods)+"\n Found:   "+str(trialType[2])+"\n In the condition "+str(condition)+" the file "+eafFile)
+        warnings.warn("The periods for estimation are not right. \n Expected:"+str(possEstPeriods)+"\n Found:   "+str(trialType[2])+"\n In the condition "+str(condition)+" the file "+eafFile)
 
 def actionCheck(trialType,condition):
-    # Checking the order of trial types is not currently working, most blocks will include all the same trial blocks.
-    # if trialType[0] != "ACTION":
-    #     warnings.warn("The first trial type is not ACTION in "+str(condition)+". In the file "+eafFile)
     actionPeriods = ['EYESCLOSED', 'OBSERVE', 'GRIP', 'MOVEMENT', 'RELEASE']
     if trialType[2] !=  actionPeriods:
-        raise Exception("The periods for action are not right. \n Expected:"+str(actionPeriods)+"\n Found:   "+str(trialType[2])+"\n In the condition "+str(condition)+" the file "+eafFile)
+        warnings.warn("The periods for action are not right. \n Expected:"+str(actionPeriods)+"\n Found:   "+str(trialType[2])+"\n In the condition "+str(condition)+" the file "+eafFile)
 
 def annoChecker(annos, eafFile, trialTypesPerTrial = 3):
     annoVals = [x[0] for x in annos]
@@ -90,7 +66,7 @@ def annoChecker(annos, eafFile, trialTypesPerTrial = 3):
             period = match.group(3)
             gripType = match.group(4) # does gripType need to be checked? probably to make sure it coocurs with movement only
         except AttributeError:
-            raise Exception("Could not parse the annotation values for the annotation: "+val+" In the file "+eafFile+" This likely means there is a typo or other error in annotations.")
+            warnings.warn("Could not parse the annotation values for the annotation: "+val+" In the file "+eafFile+" This likely means there is a typo or other error in annotations.")
 
         if annoStruct[-1][0] == condition:
             if annoStruct[-1][-1][0] == typ:
@@ -106,7 +82,7 @@ def annoChecker(annos, eafFile, trialTypesPerTrial = 3):
 
     for condition in annoStruct:
         if  not re.match("[1234567890]", condition[0]):
-            raise Exception("The condition "+condition[0]+" in "+str(condition)+" does not match the possible condition list. In the file "+eafFile)
+            warnings.warn("The condition "+condition[0]+" in "+str(condition)+" does not match the possible condition list. In the file "+eafFile)
 
         # Check that the trial types are right and in the right order:
         trialTypes = ' '.join([tt[0] for tt in condition[1:]])
@@ -130,8 +106,20 @@ def annoChecker(annos, eafFile, trialTypesPerTrial = 3):
             elif trialType[0] == "ESTIMATION":
                 estimationCheck(trialType = trialType, condition = condition)
 
+# setup a warning catcher so that each file can be stopped form processing if there are warnings that pop up, but that they are displayed. from http://stackoverflow.com/questions/2324820/count-warnings-in-python-2-4
+def setup_warning_catcher():
+    """ Wrap warnings.showwarning with code that records warnings. """
 
 
+    caught_warnings = []
+    original_showwarning = warnings.showwarning
+
+    def custom_showwarning(*args,  **kwargs):
+        caught_warnings.append(args[0])
+        return original_showwarning(*args, **kwargs)
+
+    warnings.showwarning = custom_showwarning
+    return caught_warnings
 
 
 destDir = sys.argv[1]
@@ -142,6 +130,9 @@ eafFiles = sys.argv[2:]
 for eafFile in eafFiles:
     eafPath = os.path.dirname(eafFile)
     basename = os.path.splitext(os.path.basename(eafFile))[0]
+
+    print("Starting on file "+eafFile)
+
     # fix links, but supress warnings about those links for cleaner output
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -165,13 +156,16 @@ for eafFile in eafFiles:
             ts = pyelan.timeSeries(file = tsconf)
             ts.fixLinks(searchDir = os.path.sep.join([destDir,"..","mocapCSVs"]))
 
+    # catch warnings to fail elegantly.
+    caught_warnings_list = setup_warning_catcher()
+
     # extract the annotations from the overlaps tear
     annos = []
     tier = [tier for tier in fl.tiers if tier.tierName == "OVERLAPS"]
     if len(tier) < 1:
-        raise Exception("No overlaps tier found.")
+        warnings.warn("No overlaps tier found.")
     elif len(tier) > 1:
-        raise Exception("More than one overlaps tier found.")
+        warnings.warn("More than one overlaps tier found.")
     tier = tier[0]
 
     for annotation in tier.annotations:
@@ -181,40 +175,51 @@ for eafFile in eafFiles:
     annoChecker(annos, eafFile, trialTypesPerTrial = 1)
 
     if len(annos) < 1:
-        raise Exception("No annotations on overlaps tier found.")
+        warnings.warn("No annotations on overlaps tier found.")
 
-    # relativize paths from the current to the csv
-    currPath = os.path.abspath("./")
-    relPathCSV = os.path.relpath(ts.source, start = currPath)
-    csvfile = open(relPathCSV, 'r')
-    reader = csv.DictReader(csvfile)
-    csvData = []
-    if ts.timeOrigin:
-        offset = ts.timeOrigin/1000.
+    # check warnings, if there are multiple, fail.
+    if len(caught_warnings_list) > 0:
+        if len(caught_warnings_list) == 1:
+            print("No annotations were extracted: There was one warning with file "+eafFile+"\n")
+        else:
+            print("No annotations were extracted: There were "+str(len(caught_warnings_list))+" warnings with file "+eafFile+"\n")
+
     else:
-        offset = 0
-    for row in reader:
-        csvData.append((float(row['times'])-offset, (row['0-1'], row['mean-Y-0-1-2-3-4'])))
+        # if there were no warnings, write the extracted annotations
+        print("Writing extracted annotations for "+eafFile+"\n")
+
+        # relativize paths from the current to the csv
+        currPath = os.path.abspath("./")
+        relPathCSV = os.path.relpath(ts.source, start = currPath)
+        csvfile = open(relPathCSV, 'r')
+        reader = csv.DictReader(csvfile)
+        csvData = []
+        if ts.timeOrigin:
+            offset = ts.timeOrigin/1000.
+        else:
+            offset = 0
+        for row in reader:
+            csvData.append((float(row['times'])-offset, (row['0-1'], row['mean-Y-0-1-2-3-4'])))
 
 
 
 
-    colNames = [anno[0] for anno in annos]
-    grip = []
-    for name, minn, maxx, in annos:
-        grip.append([x[1][0] for x in csvData if x[0] >= minn/1000. and x[0] <= maxx/1000.])
+        colNames = [anno[0] for anno in annos]
+        grip = []
+        for name, minn, maxx, in annos:
+            grip.append([x[1][0] for x in csvData if x[0] >= minn/1000. and x[0] <= maxx/1000.])
 
-    # turn the list into rows, but add padding for mismatched lengths.
-    gripRows = list(itertools.izip_longest(*grip))
+        # turn the list into rows, but add padding for mismatched lengths.
+        gripRows = list(itertools.izip_longest(*grip))
 
-    # create a subject directory if needed
-    subj = basename.split("-")[0]
-    if os.path.isdir(os.path.sep.join([destDir, subj])) == False :
-        os.makedirs(os.path.sep.join([destDir, subj]))
+        # create a subject directory if needed
+        subj = basename.split("-")[0]
+        if os.path.isdir(os.path.sep.join([destDir, subj])) == False :
+            os.makedirs(os.path.sep.join([destDir, subj]))
 
-    # write files
-    csvfile = open(os.path.sep.join([destDir, subj,'.'.join([basename,"csv"])]), 'w')
-    writer = csv.writer(csvfile)
-    writer.writerow(colNames)
-    for row in gripRows:
-        writer.writerow(row)
+        # write files
+        csvfile = open(os.path.sep.join([destDir, subj,'.'.join([basename,"csv"])]), 'w')
+        writer = csv.writer(csvfile)
+        writer.writerow(colNames)
+        for row in gripRows:
+            writer.writerow(row)
