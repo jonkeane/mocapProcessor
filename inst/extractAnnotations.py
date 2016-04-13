@@ -1,4 +1,4 @@
-import sys, os, re, warnings, csv, itertools
+import sys, os, re, warnings, csv, itertools, warnings
 import pyelan.pyelan as pyelan
 
 # to check and extract annotations:
@@ -17,20 +17,40 @@ def actionCheck(trialType, condition):
     if [period for period in trialType[2]] != actionPeriods:
         raise Exception("The periods for action do not contain "+str(actionPeriods)+" "+str(condition)+". In the file "+eafFile)
 
-def gestureCheck(trialType, condition):
-    # if condition[2][0] != "GESTURE":
-    #     raise Exception("The second trial type is not GESTURE in "+str(condition)+". In the file "+eafFile)
-    # setup two simple cases
-    possGestPeriods = [
-        ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT', 'RELEASE'], # this shouldn't be possible, but currently we are accepting it.
-        # grip and release are optional
-        ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT OPEN', 'RELEASE'],
-        ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT CLOSED', 'RELEASE'],
-        ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT OPEN-CLOSED', 'RELEASE'],
-        ['EYESCLOSED', 'NO GESTURE']
-        ]
-    if trialType[2] not in possGestPeriods:
-        raise Exception("The periods for gesture are not right. \n Expected:"+str(possGestPeriods)+"\n Found:   "+str(trialType[2])+"\n In the condition "+str(condition)+" the file "+eafFile)
+def gestureCheck(trialType, condition, typ, eafFile):
+    print(trialType)
+    print(condition)
+    # generate a regualr expression for checking. First check if there is a no gesture annotation, if there isn't move from there
+    pattern = re.compile('(EYESCLOSED) *(NO GESTURE|.+)')
+    match = pattern.match(' '.join(trialType[2]))
+
+    if match.group(2) != "NO GESTURE":
+        # if this is a gesture event
+        pattern = re.compile('(PLANNING) *(GRIP)? *(MOVEMENT) *(OPEN)? *(RELEASE)?')
+        subAnnos = match.group(2)
+        match = pattern.match(subAnnos)
+        if not match.group(1):
+            warnings.warn("There is no PLANNING period for condition"+str(typ)+" in file "+eafFile+" Condition:   "+str(condition[0])+" Trial types found: "+str(trialTypes))
+
+        if not match.group(4):
+            warnings.warn("There is no OPEN, CLOSED, or OPEN-CLOSED period for condition"+str(typ)+" in file "+eafFile+" Condition:   "+str(condition[0])+" Trial types found: "+str(trialType))
+
+
+
+
+
+
+    #
+    # possGestPeriods = [
+    #     # grip and release are optional
+    #     ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT OPEN', 'RELEASE'],
+    #     ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT CLOSED', 'RELEASE'],
+    #     ['EYESCLOSED', 'PLANNING', 'GRIP', 'MOVEMENT OPEN-CLOSED', 'RELEASE'],
+    #     ['EYESCLOSED', 'NO GESTURE']
+    #     ]
+    # if trialType[2] not in possGestPeriods:
+    #     raise Exception("The periods for gesture are not right. \n Expected:"+str(possGestPeriods)+"\n Found:   "+str(trialType[2])+"\n In the condition "+str(condition)+" the file "+eafFile)
+
 
 def estimationCheck(trialType, condition):
     # Checking the order does not currently work, because order has been shuffled.
@@ -108,7 +128,7 @@ def annoChecker(annos, eafFile, trialTypesPerTrial = 3):
             if trialType[0] == "ACTION":
                 actionCheck(trialType = trialType, condition = condition)
             elif trialType[0] == "GESTURE":
-                gestureCheck(trialType = trialType, condition = condition)
+                gestureCheck(trialType = trialType, condition = condition, typ = typ, eafFile = eafFile)
             elif trialType[0] == "ESTIMATION":
                 estimationCheck(trialType = trialType, condition = condition)
 
@@ -124,10 +144,14 @@ eafFiles = sys.argv[2:]
 for eafFile in eafFiles:
     eafPath = os.path.dirname(eafFile)
     basename = os.path.splitext(os.path.basename(eafFile))[0]
-    fl = pyelan.tierSet(file = eafFile)
-    fl.fixLinks(searchDir = os.path.sep.join([destDir,"..","Clipped Video"]))
-    fl.fixLinks(searchDir = os.path.sep.join([destDir,"..","AUDIO"]))
-    fl.fixLinks(searchDir = os.path.sep.join([destDir,"..","elanFilesCompleted"]))
+    # fix links, but supress warnings about those links for cleaner output
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+
+        fl = pyelan.tierSet(file = eafFile)
+        fl.fixLinks(searchDir = os.path.sep.join([destDir,"..","Clipped Video"]))
+        fl.fixLinks(searchDir = os.path.sep.join([destDir,"..","AUDIO"]))
+        fl.fixLinks(searchDir = os.path.sep.join([destDir,"..","elanFilesCompleted"]))
 
     # find time series files that are linked to the eaf.
     tsconfs = filter(lambda s: re.match(".*tsconf.xml", s), fl.linkedFiles)
@@ -136,8 +160,12 @@ for eafFile in eafFiles:
 
     for tsconf in tsconfs:
         # this should only be one file for this data
-        ts = pyelan.timeSeries(file = tsconf)
-        ts.fixLinks(searchDir = os.path.sep.join([destDir,"..","mocapCSVs"]))
+        # fix links, but supress warnings about those links for cleaner output
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+
+            ts = pyelan.timeSeries(file = tsconf)
+            ts.fixLinks(searchDir = os.path.sep.join([destDir,"..","mocapCSVs"]))
 
     # extract the annotations from the overlaps tear
     annos = []
